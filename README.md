@@ -33,5 +33,5 @@ python main.py
 ```
 
 <div align="center">
-  <img src="docs/img-filter.gif" />
+  <img src="docs/ezgif.com-gif-maker" />
 </div>
