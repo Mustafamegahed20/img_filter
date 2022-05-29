@@ -143,24 +143,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.filter_filtered.setPixmap(pixmap)
             self.filter_filtered.setScaledContents(True) 
 ########################################################################################################            
-        elif self.laplacian.isChecked():
-            ddepth = cv2.CV_16S
-            kernel_size = 9
-
-            imageName = self.path
-            imgz = cv2.imread(cv2.samples.findFile(imageName), cv2.IMREAD_COLOR) # Load an image
-
-            smoothed_img = cv2.GaussianBlur(imgz, (3, 3), 0)
-            RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-            gray_img = cv2.cvtColor(smoothed_img, cv2.COLOR_BGR2GRAY)
-            laplaced_img = cv2.Laplacian(gray_img, ddepth, ksize=kernel_size)
+        elif self.gaussian.isChecked():
+            rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            gaussian = cv2.GaussianBlur(rgb_img,(5,5),cv2.BORDER_DEFAULT)
 
 #             fig = plt.figure(figsize=(12, 12))
 #             ax1 = fig.add_subplot(2,2,1)
 #             ax1.imshow(laplaced_img, cmap='gray')
             
-            plt.imshow(laplaced_img, cmap='gray')
+            plt.imshow(gaussian)
             plt.axis('off')
 
 
@@ -268,6 +259,34 @@ class MainWindow(QtWidgets.QMainWindow):
             pixmap = QPixmap("./Output images/Highpass_filtered.jpg")
             self.filter_filtered.setPixmap(pixmap)
             self.filter_filtered.setScaledContents(True)
+            
+        elif self.sobel.isChecked():
+            rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            grad_x = cv2.Sobel(rgb_img, cv2.CV_64F, 1, 0)
+            grad_y = cv2.Sobel(rgb_img, cv2.CV_64F, 0, 1)
+            grad = np.sqrt(grad_x**2 + grad_y**2)
+            grad_norm = (grad * 255 / grad.max()).astype(np.uint8)
+            #cv2.imshow('Edges', grad_norm)
+            im = Image.fromarray(grad_norm)
+            im.save("./Output images/sobel_filtered.jpg")
+            pixmap = QPixmap("./Output images/sobel_filtered.jpg")
+            self.filter_filtered.setPixmap(pixmap)
+            self.filter_filtered.setScaledContents(True) 
+            
+        elif self.canny.isChecked():
+            rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            sigma = self.cannyBlur.value()
+
+            if sigma %2 == 0:
+           	    QMessageBox.information(self , "Error" , "Gaussian Kernel Must be odd number!")    
+            else:
+                gaussian = cv2.GaussianBlur(rgb_img,(sigma,sigma),cv2.BORDER_DEFAULT)
+                edges = cv2.Canny(gaussian,50,250)
+                im = Image.fromarray(edges)
+                im.save("./Output images/canny_filtered.jpg")
+                pixmap = QPixmap("./Output images/canny_filtered.jpg")
+                self.filter_filtered.setPixmap(pixmap)
+                self.filter_filtered.setScaledContents(True)            
 
 ######################################################################################################
     def histogram(self):
